@@ -157,6 +157,8 @@
     gap:10px;
     margin-bottom:14px;
   }
+  .properties-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .properties-grid > .filter-grid-section{display:contents;}
   .filter-item{
     background:var(--bg-deep);
     padding:8px 10px;
@@ -250,6 +252,7 @@
     .hw-ruler{display:none;}
     .hw-row-label{width:44px; flex:0 0 44px;}
     .hw-readout{width:64px; flex:0 0 64px;}
+    .properties-grid{grid-template-columns:1fr;}
   }
 
   /* ---------- table ---------- */
@@ -323,6 +326,9 @@
     .wrap{padding:18px 12px 60px;}
     table{min-width:1120px;}
   }
+  @media (min-width:641px) and (max-width:950px){
+    .properties-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
 
   ::selection{background:var(--redstone); color:#fff;}
   :focus-visible{outline:2px solid var(--lapis-glow); outline-offset:2px;}
@@ -349,8 +355,10 @@
 
     <fieldset>
       <legend>Properties (click to toggle Any &rarr; Yes &rarr; No)</legend>
-      <div class="filter-grid" id="choiceGrid"></div>
-      <div class="filter-grid" id="filterGrid"></div>
+      <div class="filter-grid properties-grid">
+        <div class="filter-grid-section" id="choiceGrid"></div>
+        <div class="filter-grid-section" id="filterGrid"></div>
+      </div>
     </fieldset>
 
     <div class="hw-panel bevel-in">
