@@ -1,0 +1,14 @@
+{
+  "name": "minecraft-block-sorter",
+  "version": "1.0.0",
+  "description": "Redstone Block Index - filterable Minecraft (Java Edition) block property catalogue.",
+  "private": true,
+  "scripts": {
+    "build": "python scripts/build.py",
+    "export": "python scripts/export_xlsx.py",
+    "validate": "node scripts/validate.js"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.0"
+  }
+}
