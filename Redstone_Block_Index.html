@@ -134,9 +134,10 @@
     background:var(--bg-panel-2);
     color:var(--text);
     padding:8px 12px;
+    border:none;
   }
   button:hover{background:#3c3327; color:#fff;}
-  button:active{border-top:2px solid var(--bevel-lo); border-left:2px solid var(--bevel-lo); border-bottom:2px solid var(--bevel-hi); border-right:2px solid var(--bevel-hi);}
+  button:active{filter:brightness(.85);}
   button.on{background:var(--redstone); color:#fff; box-shadow:0 0 10px rgba(199,58,47,.55);}
   button.reset{background:#3a2b28; color:#f0c8c4;}
   button.reset:hover{background:var(--redstone);}
@@ -168,7 +169,6 @@
     padding:4px 8px; font-size:10px; background:var(--bg-panel-2); min-width:26px;
   }
   .tri.choice button{padding:4px 6px; font-size:9.5px; min-width:0;}
-  #choiceGrid{grid-template-columns:repeat(auto-fill, minmax(300px,1fr));}
   .tri button.on{background:var(--lapis); box-shadow:0 0 8px rgba(63,111,176,.6);}
   .tri button.on.yes{background:var(--true-c); color:#0c1c11;}
   .tri button.on.no{background:var(--false-c); color:#210b0a;}
@@ -206,8 +206,6 @@
   .hw-track{
     position:relative; flex:1 1 auto; height:26px;
     background:var(--bevel-lo);
-    border-top:2px solid var(--bevel-lo); border-left:2px solid var(--bevel-lo);
-    border-bottom:2px solid var(--bevel-hi); border-right:2px solid var(--bevel-hi);
   }
   .hw-cells{
     position:absolute; inset:0; display:grid; grid-template-columns:repeat(25,1fr);
@@ -217,14 +215,10 @@
   .hw-cells div:nth-child(odd){background:#231e18;}
   .hw-fill{
     position:absolute; top:0; bottom:0; left:0; width:0;
-    background-image:
-      repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0, rgba(255,255,255,.14) 50%, transparent 50%, transparent 100%),
-      linear-gradient(180deg, var(--lapis-glow) 0%, var(--lapis) 100%);
-    background-size:8% 100%, 100% 100%;
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+    background-image:repeating-linear-gradient(90deg, var(--cell-a) 0, var(--cell-a) 50%, var(--cell-b) 50%, var(--cell-b) 100%);
   }
   .hw-handle{
-    position:absolute; top:0; height:100%; width:22px;
+    position:absolute; top:0; height:100%; width:36px;
     transform:translateX(-50%);
     cursor:ew-resize;
     background:transparent;
@@ -232,14 +226,19 @@
     touch-action:none;
   }
   .hw-handle::before{
-    content:''; position:absolute; top:0; left:3px; right:3px; height:100%;
+    content:''; position:absolute; top:20%; width:10px; height:60%;
     background:#8ea6cf;
-    box-shadow:inset 2px 2px 0 rgba(255,255,255,.35), inset -2px -2px 0 rgba(0,0,0,.4);
   }
-  .hw-handle-min::before{clip-path:polygon(0 0, 45% 0, 45% 32%, 100% 50%, 45% 68%, 45% 100%, 0 100%);}
-  .hw-handle-max::before{clip-path:polygon(100% 0, 55% 0, 55% 32%, 0 50%, 55% 68%, 55% 100%, 100% 100%);}
+  .hw-handle-min::before{
+    right:calc(50% + 5px);
+    clip-path:polygon(50% 0, 100% 0, 100% 100%, 50% 100%, 50% 66.666%, 0 66.666%, 0 33.333%, 50% 33.333%);
+  }
+  .hw-handle-max::before{
+    left:calc(50% + 5px);
+    clip-path:polygon(0 0, 50% 0, 50% 33.333%, 100% 33.333%, 100% 66.666%, 50% 66.666%, 50% 100%, 0 100%);
+  }
   .hw-handle:hover::before{background:var(--lapis-glow);}
-  .hw-handle:active::before,.hw-handle.dragging::before{background:var(--gold); box-shadow:inset 2px 2px 0 rgba(255,255,255,.5), inset -2px -2px 0 rgba(0,0,0,.4), 0 0 10px rgba(224,179,74,.6);}
+  .hw-handle:active::before,.hw-handle.dragging::before{background:var(--gold);}
   .hw-handle:focus-visible::before{outline:2px solid var(--lapis-glow); outline-offset:2px;}
   .hw-fill.dragging{cursor:grabbing;}
   .hw-fill{cursor:grab;}
@@ -340,10 +339,10 @@
 
   <div class="toolbar bevel">
     <div class="search-row">
-      <input id="search" class="bevel-in" type="text" placeholder="Search by name, category, or note&hellip;">
+      <input id="search" type="text" placeholder="Search by name, category, or note&hellip;">
       <div class="count-badge"><span id="shownCount">0</span> / <span id="totalCount2">0</span> shown</div>
-      <button class="bevel" id="exportBtn">&#8681; Export CSV</button>
-      <button class="reset bevel" id="resetBtn">&#10006; Reset all</button>
+      <button id="exportBtn">&#8681; Export CSV</button>
+      <button class="reset" id="resetBtn">&#10006; Reset all</button>
     </div>
 
     <div class="presets" id="presets"></div>
@@ -378,7 +377,7 @@
       </div>
     </div>
 
-    <div class="cat-toggle bevel" id="catToggle" style="padding:8px 10px; display:inline-flex;">
+    <div class="cat-toggle" id="catToggle" style="padding:8px 10px; display:inline-flex;">
       <span id="catToggleLabel">&#9660; Filter by category (all shown)</span>
     </div>
     <div class="cat-panel" id="catPanel"></div>
@@ -468,7 +467,7 @@ function buildFilterGrid(){
   grid.innerHTML='';
   PROPS.forEach(p=>{
     const item = document.createElement('div');
-    item.className='filter-item';
+    item.className='filter-item bevel-in';
     item.innerHTML = `<span class="flabel">${p.label}</span>
       <div class="tri" data-key="${p.key}">
         <button data-v="any" class="on">Any</button>
@@ -508,7 +507,7 @@ function buildChoiceFilters(){
   grid.innerHTML='';
   CHOICES.forEach(c=>{
     const item = document.createElement('div');
-    item.className='filter-item';
+    item.className='filter-item bevel-in';
     const btns = ['<button data-v="any" class="on">Any</button>']
       .concat(c.values.map(v=>`<button data-v="${v}">${v}</button>`))
       .join('');
@@ -545,7 +544,6 @@ function buildPresets(){
   wrap.innerHTML='';
   PRESETS.forEach(preset=>{
     const b = document.createElement('button');
-    b.className='bevel';
     b.textContent = preset.label;
     b.addEventListener('click', ()=>{
       state.filters = {...preset.f};
@@ -725,7 +723,9 @@ function makeRangeSlider({track, handleMin, handleMax, fill, readout, get, set})
     const span = max-min+1;
     fill.style.left = (min*cellPct)+'%';
     fill.style.width = (span*cellPct)+'%';
-    fill.style.backgroundSize = (200/span)+'% 100%, 100% 100%';
+    fill.style.backgroundSize = (200/span)+'% 100%';
+    fill.style.setProperty('--cell-a', min%2 ? 'var(--lapis-glow)' : 'var(--lapis)');
+    fill.style.setProperty('--cell-b', min%2 ? 'var(--lapis)' : 'var(--lapis-glow)');
     handleMin.style.left = (min*cellPct)+'%';
     handleMax.style.left = ((max+1)*cellPct)+'%';
     handleMin.setAttribute('aria-valuenow', min);
