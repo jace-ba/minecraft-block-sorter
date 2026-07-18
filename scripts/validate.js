@@ -60,13 +60,17 @@ search.dispatchEvent(new win.Event("input", { bubbles: true }));
 check("search narrows results", Number(doc.getElementById("shownCount").textContent) < total);
 doc.getElementById("resetBtn").dispatchEvent(new win.Event("click", { bubbles: true }));
 
-// width filter
-const wMin = doc.getElementById("wMin");
-wMin.value = "15";
-wMin.dispatchEvent(new win.Event("input", { bubbles: true }));
+// width filter (pixel range slider) -- drive the min handle up via keyboard
+const wHandleMin = doc.getElementById("wHandleMin");
+check("width slider min handle rendered", !!wHandleMin);
+for (let i = 0; i < 15; i++) {
+  wHandleMin.dispatchEvent(new win.KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+}
+check("width readout reflects drag", doc.getElementById("wReadout").textContent.includes("15"));
 const afterW = Number(doc.getElementById("shownCount").textContent);
 check("width filter narrows results", afterW > 0 && afterW < total);
 doc.getElementById("resetBtn").dispatchEvent(new win.Event("click", { bubbles: true }));
+check("width readout resets after Reset all", doc.getElementById("wReadout").textContent.includes("0") && doc.getElementById("wReadout").textContent.includes("24"));
 
 // detail expand
 rows[0].dispatchEvent(new win.Event("click", { bubbles: true }));

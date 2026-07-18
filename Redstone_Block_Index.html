@@ -187,12 +187,71 @@
   }
   .cat-chip.on{background:var(--gold); color:#231a06;}
 
-  .height-row{display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text-dim);}
-  .height-row input{
-    width:64px; background:var(--bg-deep); color:var(--text); border:none; font-family:var(--mono);
-    padding:6px 8px; font-size:12px;
+  /* ---------- height/width pixel range sliders ---------- */
+  .hw-panel{background:var(--bg-deep); padding:12px 12px 10px; margin-bottom:14px;}
+  .hw-ruler{
+    display:grid; grid-template-columns:repeat(25,1fr);
+    margin:0 0 6px; padding-left:70px; padding-right:86px;
   }
-  .height-row input:focus{outline:2px solid var(--lapis-glow); outline-offset:-2px;}
+  .hw-ruler span{
+    text-align:center; font-size:9px; font-family:var(--mono); font-weight:600;
+    color:var(--text-faint); background:var(--bg-panel-2); padding:4px 0;
+  }
+  .hw-ruler span:nth-child(odd){background:#241f19;}
+  .hw-row{display:flex; align-items:center; gap:10px; margin:8px 0;}
+  .hw-row-label{
+    width:60px; flex:0 0 60px; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--text-dim);
+  }
+  .hw-track{
+    position:relative; flex:1 1 auto; height:26px;
+    background:var(--bevel-lo);
+    border-top:2px solid var(--bevel-lo); border-left:2px solid var(--bevel-lo);
+    border-bottom:2px solid var(--bevel-hi); border-right:2px solid var(--bevel-hi);
+  }
+  .hw-cells{
+    position:absolute; inset:0; display:grid; grid-template-columns:repeat(25,1fr);
+    pointer-events:none;
+  }
+  .hw-cells div{background:var(--bg-panel-2);}
+  .hw-cells div:nth-child(odd){background:#231e18;}
+  .hw-fill{
+    position:absolute; top:0; bottom:0; left:0; width:0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0, rgba(255,255,255,.14) 50%, transparent 50%, transparent 100%),
+      linear-gradient(180deg, var(--lapis-glow) 0%, var(--lapis) 100%);
+    background-size:8% 100%, 100% 100%;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+  }
+  .hw-handle{
+    position:absolute; top:0; height:100%; width:22px;
+    transform:translateX(-50%);
+    cursor:ew-resize;
+    background:transparent;
+    z-index:2;
+    touch-action:none;
+  }
+  .hw-handle::before{
+    content:''; position:absolute; top:0; left:3px; right:3px; height:100%;
+    background:#8ea6cf;
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,.35), inset -2px -2px 0 rgba(0,0,0,.4);
+  }
+  .hw-handle-min::before{clip-path:polygon(0 0, 45% 0, 45% 32%, 100% 50%, 45% 68%, 45% 100%, 0 100%);}
+  .hw-handle-max::before{clip-path:polygon(100% 0, 55% 0, 55% 32%, 0 50%, 55% 68%, 55% 100%, 100% 100%);}
+  .hw-handle:hover::before{background:var(--lapis-glow);}
+  .hw-handle:active::before,.hw-handle.dragging::before{background:var(--gold); box-shadow:inset 2px 2px 0 rgba(255,255,255,.5), inset -2px -2px 0 rgba(0,0,0,.4), 0 0 10px rgba(224,179,74,.6);}
+  .hw-handle:focus-visible::before{outline:2px solid var(--lapis-glow); outline-offset:2px;}
+  .hw-fill.dragging{cursor:grabbing;}
+  .hw-fill{cursor:grab;}
+  .hw-readout{
+    width:76px; flex:0 0 76px; text-align:right; font-size:11.5px; color:var(--text);
+    font-variant-numeric:tabular-nums;
+  }
+  @media (max-width:640px){
+    .hw-ruler{display:none;}
+    .hw-row-label{width:44px; flex:0 0 44px;}
+    .hw-readout{width:64px; flex:0 0 64px;}
+  }
 
   /* ---------- table ---------- */
   .table-wrap{
@@ -295,18 +354,28 @@
       <div class="filter-grid" id="filterGrid"></div>
     </fieldset>
 
-    <div class="height-row">
-      <span>Height (px) between</span>
-      <input type="number" id="hMin" min="0" max="24" placeholder="0">
-      <span>and</span>
-      <input type="number" id="hMax" min="0" max="24" placeholder="24">
-    </div>
-
-    <div class="height-row">
-      <span>Width/Length (px) between</span>
-      <input type="number" id="wMin" min="0" max="24" placeholder="0">
-      <span>and</span>
-      <input type="number" id="wMax" min="0" max="24" placeholder="24">
+    <div class="hw-panel bevel-in">
+      <div class="hw-ruler" id="hwRuler"></div>
+      <div class="hw-row">
+        <span class="hw-row-label">height</span>
+        <div class="hw-track" id="hTrack">
+          <div class="hw-cells"></div>
+          <div class="hw-fill" id="hFill"></div>
+          <div class="hw-handle hw-handle-min" id="hHandleMin" tabindex="0" role="slider" aria-label="Height minimum" aria-valuemin="0" aria-valuemax="24"></div>
+          <div class="hw-handle hw-handle-max" id="hHandleMax" tabindex="0" role="slider" aria-label="Height maximum" aria-valuemin="0" aria-valuemax="24"></div>
+        </div>
+        <span class="hw-readout" id="hReadout">0&ndash;24 px</span>
+      </div>
+      <div class="hw-row">
+        <span class="hw-row-label">width</span>
+        <div class="hw-track" id="wTrack">
+          <div class="hw-cells"></div>
+          <div class="hw-fill" id="wFill"></div>
+          <div class="hw-handle hw-handle-min" id="wHandleMin" tabindex="0" role="slider" aria-label="Width minimum" aria-valuemin="0" aria-valuemax="24"></div>
+          <div class="hw-handle hw-handle-max" id="wHandleMax" tabindex="0" role="slider" aria-label="Width maximum" aria-valuemin="0" aria-valuemax="24"></div>
+        </div>
+        <span class="hw-readout" id="wReadout">0&ndash;24 px</span>
+      </div>
     </div>
 
     <div class="cat-toggle bevel" id="catToggle" style="padding:8px 10px; display:inline-flex;">
@@ -386,8 +455,8 @@ let state = {
   cats: new Set(DATA.map(d=>d.category)),
   sortKey:'name',
   sortDir:1,
-  hMin:null, hMax:null,
-  wMin:null, wMax:null,
+  hMin:0, hMax:24,
+  wMin:0, wMax:24,
   expanded:null,
   catOpen:false,
 };
@@ -630,22 +699,125 @@ document.getElementById('search').addEventListener('input', (e)=>{
   render();
 });
 
-document.getElementById('hMin').addEventListener('input', (e)=>{
-  state.hMin = e.target.value===''? null : Number(e.target.value);
-  render();
-});
-document.getElementById('hMax').addEventListener('input', (e)=>{
-  state.hMax = e.target.value===''? null : Number(e.target.value);
-  render();
-});
+/* ---------- pixel range sliders (height / width) ---------- */
+const PX_STEPS = 25; // values 0..24
 
-document.getElementById('wMin').addEventListener('input', (e)=>{
-  state.wMin = e.target.value===''? null : Number(e.target.value);
-  render();
+function buildRuler(){
+  const ruler = document.getElementById('hwRuler');
+  ruler.innerHTML = '';
+  for(let i=0;i<PX_STEPS;i++){
+    const span = document.createElement('span');
+    span.textContent = i;
+    ruler.appendChild(span);
+  }
+  document.querySelectorAll('.hw-cells').forEach(cellsEl=>{
+    cellsEl.innerHTML = '';
+    for(let i=0;i<PX_STEPS;i++) cellsEl.appendChild(document.createElement('div'));
+  });
+}
+
+function makeRangeSlider({track, handleMin, handleMax, fill, readout, get, set}){
+  const clamp = (v,lo,hi)=> Math.max(lo, Math.min(hi, v));
+  const cellPct = 100/PX_STEPS;
+
+  function paint(){
+    const {min,max} = get();
+    const span = max-min+1;
+    fill.style.left = (min*cellPct)+'%';
+    fill.style.width = (span*cellPct)+'%';
+    fill.style.backgroundSize = (200/span)+'% 100%, 100% 100%';
+    handleMin.style.left = (min*cellPct)+'%';
+    handleMax.style.left = ((max+1)*cellPct)+'%';
+    handleMin.setAttribute('aria-valuenow', min);
+    handleMax.setAttribute('aria-valuenow', max);
+    readout.textContent = (min===max) ? `${min} px` : `${min}\u2013${max} px`;
+  }
+
+  function valueFromClientX(clientX){
+    const rect = track.getBoundingClientRect();
+    return clamp((clientX - rect.left) / rect.width, 0, 1) * PX_STEPS;
+  }
+
+  function dragHandle(which, pointerId, moveEv){
+    const onMove = (ev)=>{
+      const raw = valueFromClientX(ev.clientX);
+      const {min,max} = get();
+      if(which==='min'){
+        const v = clamp(Math.round(raw), 0, max);
+        if(v!==min){ set(v,max); paint(); render(); }
+      } else {
+        const v = clamp(Math.round(raw)-1, min, 24);
+        if(v!==max){ set(min,v); paint(); render(); }
+      }
+    };
+    const onUp = (ev)=>{
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      (which==='min'?handleMin:handleMax).classList.remove('dragging');
+    };
+    (which==='min'?handleMin:handleMax).classList.add('dragging');
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }
+
+  handleMin.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dragHandle('min', e.pointerId, e); });
+  handleMax.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dragHandle('max', e.pointerId, e); });
+
+  handleMin.addEventListener('keydown', (e)=>{
+    const {min,max} = get();
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ set(clamp(min-1,0,max), max); paint(); render(); }
+    else if(e.key==='ArrowRight'||e.key==='ArrowUp'){ set(clamp(min+1,0,max), max); paint(); render(); }
+  });
+  handleMax.addEventListener('keydown', (e)=>{
+    const {min,max} = get();
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ set(min, clamp(max-1,min,24)); paint(); render(); }
+    else if(e.key==='ArrowRight'||e.key==='ArrowUp'){ set(min, clamp(max+1,min,24)); paint(); render(); }
+  });
+
+  fill.addEventListener('pointerdown', (e)=>{
+    e.preventDefault();
+    const startX = e.clientX;
+    const {min:startMin,max:startMax} = get();
+    const span = startMax - startMin;
+    const rect = track.getBoundingClientRect();
+    fill.classList.add('dragging');
+    const onMove = (ev)=>{
+      const deltaSteps = Math.round(((ev.clientX-startX)/rect.width)*PX_STEPS);
+      let newMin = clamp(startMin+deltaSteps, 0, 24-span);
+      set(newMin, newMin+span);
+      paint(); render();
+    };
+    const onUp = ()=>{
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      fill.classList.remove('dragging');
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  });
+
+  paint();
+  return {paint};
+}
+
+buildRuler();
+const hSlider = makeRangeSlider({
+  track: document.getElementById('hTrack'),
+  handleMin: document.getElementById('hHandleMin'),
+  handleMax: document.getElementById('hHandleMax'),
+  fill: document.getElementById('hFill'),
+  readout: document.getElementById('hReadout'),
+  get: ()=>({min:state.hMin, max:state.hMax}),
+  set: (min,max)=>{ state.hMin=min; state.hMax=max; },
 });
-document.getElementById('wMax').addEventListener('input', (e)=>{
-  state.wMax = e.target.value===''? null : Number(e.target.value);
-  render();
+const wSlider = makeRangeSlider({
+  track: document.getElementById('wTrack'),
+  handleMin: document.getElementById('wHandleMin'),
+  handleMax: document.getElementById('wHandleMax'),
+  fill: document.getElementById('wFill'),
+  readout: document.getElementById('wReadout'),
+  get: ()=>({min:state.wMin, max:state.wMax}),
+  set: (min,max)=>{ state.wMin=min; state.wMax=max; },
 });
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
@@ -677,12 +849,10 @@ document.getElementById('catToggle').addEventListener('click', ()=>{
 
 document.getElementById('resetBtn').addEventListener('click', ()=>{
   state.search=''; state.filters={}; state.cats = new Set(allCats);
-  state.hMin=null; state.hMax=null; state.wMin=null; state.wMax=null; state.expanded=null;
+  state.hMin=0; state.hMax=24; state.wMin=0; state.wMax=24; state.expanded=null;
   document.getElementById('search').value='';
-  document.getElementById('hMin').value='';
-  document.getElementById('hMax').value='';
-  document.getElementById('wMin').value='';
-  document.getElementById('wMax').value='';
+  hSlider.paint();
+  wSlider.paint();
   PROPS.forEach(p=> setFilterUI(p.key, undefined));
   CHOICES.forEach(c=> setChoiceUI(c.key, undefined));
   document.querySelectorAll('.cat-chip').forEach(c=>c.classList.add('on'));
