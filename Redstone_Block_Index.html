@@ -257,9 +257,9 @@
   /* ---------- table ---------- */
   .table-wrap{
     background:var(--bg-panel);
-    overflow-x:auto;
+    overflow:visible;
   }
-  table{border-collapse:collapse; width:100%; min-width:1380px;}
+  table{border-collapse:collapse; width:100%; min-width:1240px;}
   thead th{
     position:sticky; top:0; z-index:2;
     background:#1f1a15;
@@ -336,10 +336,12 @@
   @media (max-width:640px){
     h1{font-size:16px;}
     .wrap{padding:18px 12px 60px;}
+    .table-wrap{overflow-x:auto;}
     table{min-width:1120px;}
   }
   @media (min-width:641px) and (max-width:950px){
     .properties-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .table-wrap{overflow-x:auto;}
   }
 
   ::selection{background:var(--redstone); color:#fff;}
@@ -440,7 +442,6 @@ const CHOICES = [
 
 const COLS = [
   {key:'name', label:'Name', type:'text'},
-  {key:'category', label:'Category', type:'text'},
   {key:'piston', label:'Piston', type:'cat'},
   {key:'breaks_water', label:'Water-Break', type:'bool'},
   {key:'stable', label:'Stable', type:'bool'},
@@ -697,7 +698,6 @@ function render(){
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="name-cell">${row.name}</td>
-      <td class="cat-cell">${row.category}</td>
       <td class="num-cell">${noted(row,'piston',pillCat(row.piston))}</td>
       <td class="num-cell">${noted(row,'breaks_water',pill(row.breaks_water))}</td>
       <td class="num-cell">${noted(row,'stable',pill(row.stable))}</td>
@@ -723,6 +723,7 @@ function render(){
       td.colSpan = COLS.length;
       td.innerHTML = `
         <div class="detail-grid">
+          <div><b>Category</b>${row.category}</div>
           <div><b>Piston Behavior</b>${pillCat(row.piston)}</div>
           ${PROPS.map(p=>`<div><b>${p.label}</b>${pill(row[p.key])}</div>`).join('')}
           <div><b>Height</b>${row.height}px${row.height>16?' (exceeds a full block)':''}</div>
@@ -870,12 +871,13 @@ const wSlider = makeRangeSlider({
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
   const filtered = DATA.filter(matches);
-  const cols = COLS.map(c=>c.key);
+  const exportCols = [COLS[0], {key:'category', label:'Category'}, ...COLS.slice(1)];
+  const cols = exportCols.map(c=>c.key);
   const csvEscape = (v)=>{
     const s = String(v);
     return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
   };
-  const header = COLS.map(c=>c.label);
+  const header = exportCols.map(c=>c.label);
   const rows = filtered.map(row=> cols.map(k=> csvEscape(row[k])).join(','));
   const csv = [header.join(','), ...rows].join('\r\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});

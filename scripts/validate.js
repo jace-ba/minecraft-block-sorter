@@ -46,11 +46,12 @@ check(
 );
 check(
   "grindstone width has note indicator",
-  !!grindstoneRow?.querySelector("td:nth-child(11) .property-note")
+  !!grindstoneRow?.querySelector("td:nth-child(10) .property-note")
 );
 
 const headers = Array.from(doc.querySelectorAll("#headRow th")).map((th) => th.textContent.trim());
-check("header has 13 columns", headers.length === 13);
+check("header has 12 columns", headers.length === 12);
+check("category column is hidden", !headers.includes("Category"));
 check("has merged 'Piston' column", headers.includes("Piston"));
 check("no separate 'Movable' column", !headers.includes("Movable"));
 
@@ -88,6 +89,7 @@ rows[0].dispatchEvent(new win.Event("click", { bubbles: true }));
 const detail = doc.querySelector("#tbody tr.detail-row");
 check("row expands to detail view", !!detail);
 check("detail shows Width / Length", detail && detail.innerHTML.includes("Width / Length"));
+check("detail retains Category", detail && detail.innerHTML.includes("Category"));
 
 console.log(failures === 0 ? "\nALL PASS" : `\n${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);
