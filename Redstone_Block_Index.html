@@ -294,6 +294,19 @@
   tbody tr:hover td.name-cell{background:#3a2f22;}
   td.cat-cell{color:var(--text-faint); font-size:11px; white-space:nowrap;}
   td.num-cell{text-align:center; font-variant-numeric:tabular-nums;}
+  .property-note{
+    display:inline-flex;
+    align-items:flex-start;
+    gap:2px;
+    cursor:help;
+  }
+  .property-note-value{border-bottom:1.3px dashed var(--gold);}
+  .property-note sup{
+    color:var(--gold);
+    font-size:10px;
+    line-height:1;
+    text-shadow:1px 1px #21170a;
+  }
 
   .pill{
     display:inline-block; min-width:20px; text-align:center;
@@ -610,6 +623,34 @@ function pillCat(v){
   return `<span class="pill ${CAT_CLASS[v]||'mid'}">${v||'\u2014'}</span>`;
 }
 
+const NOTE_PATTERNS = {
+  piston: /\bpiston|push(?:ed|ing)?|pull(?:ed|ing)?|movable|relocat|stick(?:y|s)?\b/i,
+  breaks_water: /washed away|flowing water|water destroys|survives water|waterlog|water extinguishes/i,
+  stable: /needs .*(?:below|above|behind)|attach(?:es|ed)|support(?:ed|ing)|float freely|anchoring/i,
+  spawn_hostile: /spawn(?:ing)? surface|mobs? .*spawn|spawn .*mobs?|valid spawn|not opaque|opaque spawn/i,
+  spawn_friendly: /spawn(?:ing)? surface|mobs? .*spawn|spawn .*mobs?|valid spawn|not opaque|opaque spawn/i,
+  solid: /\bcollision|no collision|solid but|entities (?:pass|sink)|walk .*over|bump into/i,
+  conductive: /\bconductive|conducts? redstone|pass a redstone signal/i,
+  falls: /\bgravity|falling state|falls? (?:if|once|downward)|fall damage/i,
+  flammable: /\bflammable|not flammable|burns? away|set alight|catch(?:es)? fire/i,
+};
+
+function escapeAttr(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function propertyNote(row, key){
+  if(key==='height' && row.height_note) return row.height_note;
+  if(key==='width' && row.width_note) return row.width_note;
+  return row.notes && NOTE_PATTERNS[key]?.test(row.notes) ? row.notes : '';
+}
+
+function noted(row, key, html){
+  const note = propertyNote(row, key);
+  if(!note) return html;
+  return `<span class="property-note" title="${escapeAttr(note)}" aria-label="${escapeAttr(note)}"><span class="property-note-value">${html}</span><sup>*</sup></span>`;
+}
+
 function matches(row){
   if(!state.cats.has(row.category)) return false;
   for(const k in state.filters){
@@ -657,17 +698,17 @@ function render(){
     tr.innerHTML = `
       <td class="name-cell">${row.name}</td>
       <td class="cat-cell">${row.category}</td>
-      <td class="num-cell">${pillCat(row.piston)}</td>
-      <td class="num-cell">${pill(row.breaks_water)}</td>
-      <td class="num-cell">${pill(row.stable)}</td>
-      <td class="num-cell">${pill(row.spawn_hostile)}</td>
-      <td class="num-cell">${pill(row.spawn_friendly)}</td>
-      <td class="num-cell">${pill(row.solid)}</td>
-      <td class="num-cell">${pill(row.conductive)}</td>
-      <td class="num-cell">${row.height}px</td>
-      <td class="num-cell">${row.width}px</td>
-      <td class="num-cell">${pill(row.falls)}</td>
-      <td class="num-cell">${pill(row.flammable)}</td>
+      <td class="num-cell">${noted(row,'piston',pillCat(row.piston))}</td>
+      <td class="num-cell">${noted(row,'breaks_water',pill(row.breaks_water))}</td>
+      <td class="num-cell">${noted(row,'stable',pill(row.stable))}</td>
+      <td class="num-cell">${noted(row,'spawn_hostile',pill(row.spawn_hostile))}</td>
+      <td class="num-cell">${noted(row,'spawn_friendly',pill(row.spawn_friendly))}</td>
+      <td class="num-cell">${noted(row,'solid',pill(row.solid))}</td>
+      <td class="num-cell">${noted(row,'conductive',pill(row.conductive))}</td>
+      <td class="num-cell">${noted(row,'height',row.height+'px')}</td>
+      <td class="num-cell">${noted(row,'width',row.width+'px')}</td>
+      <td class="num-cell">${noted(row,'falls',pill(row.falls))}</td>
+      <td class="num-cell">${noted(row,'flammable',pill(row.flammable))}</td>
     `;
     tr.addEventListener('click', ()=>{
       state.expanded = state.expanded===row.id ? null : row.id;

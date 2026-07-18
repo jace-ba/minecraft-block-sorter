@@ -38,6 +38,17 @@ check("honey block present", !!honeyRow);
 check("honey height cell = 15px", /15px/.test(honeyRow.textContent));
 check("honey width cell = 14px", /14px/.test(honeyRow.textContent));
 
+const shelfRow = rows[rowTexts.findIndex((t) => t.includes("Shelf (all wood types)"))];
+const grindstoneRow = rows[rowTexts.findIndex((t) => t.includes("Grindstone"))];
+check(
+  "shelf flammable value has note indicator",
+  !!shelfRow?.querySelector("td:last-child .property-note")
+);
+check(
+  "grindstone width has note indicator",
+  !!grindstoneRow?.querySelector("td:nth-child(11) .property-note")
+);
+
 const headers = Array.from(doc.querySelectorAll("#headRow th")).map((th) => th.textContent.trim());
 check("header has 13 columns", headers.length === 13);
 check("has merged 'Piston' column", headers.includes("Piston"));
