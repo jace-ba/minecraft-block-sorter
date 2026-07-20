@@ -4,7 +4,7 @@
 Single source of truth: ``data/blocks.csv``.
 
 This reads that CSV and injects it (as the ``const DATA = [...]`` JavaScript
-array) into ``Redstone_Block_Index.html``. Edit the CSV, run this script, and
+array) into ``index.html``. Edit the CSV, run this script, and
 the app is updated. Nothing else needs to touch the block data by hand.
 
 Usage:
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CSV_PATH = ROOT / "data" / "blocks.csv"
-HTML_PATH = ROOT / "Redstone_Block_Index.html"
+HTML_PATH = ROOT / "index.html"
 
 # Column name -> type. Anything not listed is treated as a string.
 # `piston` is a categorical string column: "Movable" | "Immovable" | "Breaks".

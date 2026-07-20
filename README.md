@@ -10,7 +10,7 @@ flammability). Blocks are grouped by behavior family (~238 rows).
 | File | What it is |
 | --- | --- |
 | `data/blocks.csv` | **Source of truth.** All block data lives here. Edit this. |
-| `Redstone_Block_Index.html` | The interactive app (generated data, single self-contained file). |
+| `index.html` | The interactive app (generated data, single self-contained file). |
 | `Minecraft_Redstone_Block_Index.xlsx` | Downloadable spreadsheet (generated from the CSV). |
 | `scripts/build.py` | Reads the CSV and injects the data into the HTML app. |
 | `scripts/export_xlsx.py` | Reads the CSV and regenerates the `.xlsx`. |
@@ -22,11 +22,11 @@ flammability). Blocks are grouped by behavior family (~238 rows).
 the generated artifacts:
 
 ```bash
-python scripts/build.py        # update the web app (Redstone_Block_Index.html)
+python scripts/build.py        # update the web app (index.html)
 python scripts/export_xlsx.py  # update the spreadsheet (.xlsx)
 ```
 
-Then open `Redstone_Block_Index.html` in a browser.
+Then open `index.html` in a browser.
 
 ### CSV columns
 

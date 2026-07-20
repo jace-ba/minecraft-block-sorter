@@ -1,5 +1,5 @@
 /*
- * Smoke test for the built app. Loads Redstone_Block_Index.html in a headless
+ * Smoke test for the built app. Loads index.html in a headless
  * DOM and exercises the data + core interactions.
  *
  * Requires jsdom:  npm install jsdom
@@ -9,7 +9,7 @@ const path = require("path");
 const fs = require("fs");
 const { JSDOM } = require("jsdom");
 
-const HTML_PATH = path.join(__dirname, "..", "Redstone_Block_Index.html");
+const HTML_PATH = path.join(__dirname, "..", "index.html");
 const html = fs.readFileSync(HTML_PATH, "utf-8");
 const dom = new JSDOM(html, { runScripts: "dangerously" });
 const { window: win } = dom;
